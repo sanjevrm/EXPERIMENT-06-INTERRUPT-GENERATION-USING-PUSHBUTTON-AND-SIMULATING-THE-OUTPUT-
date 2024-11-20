@@ -1,6 +1,7 @@
 # EXPERIMENT-06-INTERRUPT-GENERATION-USING-PUSHBUTTON-AND-SIMULATING-THE-OUTPUT
-### NAME : SANJEV R M
-### REGISTER NUMBER : 212223040186
+## NAME : SANJEV R M
+## REG NO : 212223040186
+## DATE:14/10/2024
 ### Aim:
 To Interface a push button and generate an interrupt , simulate it using an led and simuate it on  proteus 
 
@@ -34,17 +35,18 @@ One important thing to note here is that same number pins are connected to line 
 
 Now each of these lines EXTI0-EXTI15 can be used to trigger an interrupt on different modes of the signal : rising edge, falling edge or rising_falling edge.
 ## Procedure:
-```
-1. click on STM 32 CUBE IDE, the following screen will appear 
-2. click on FILE, click on new stm 32 project 
+ 1. click on STM 32 CUBE IDE, the following screen will appear 
+ 2. click on FILE, click on new stm 32 project 
 3. select the target to be programmed  as shown below and click on next 
 4.select the program name 
+
 5. corresponding ioc file will be generated automatically 
 6.select the appropriate pins as gipo, in or out, USART or required options and configure 
 7.click on cntrl+S , automaticall C program will be generated 
 8. edit the program and as per required 
 9. Select EXTI pin configuration and clock configuration 
 10. once the project is bulild 
+11. click on debug option 
 12.  Creating Proteus project and running the simulation
 We are now at the last part of step by step guide on how to simulate STM32 project in Proteus.
 13. Create a new Proteus project and place STM32F40xx i.e. the same MCU for which the project was created in STM32Cube IDE. 
@@ -52,26 +54,30 @@ We are now at the last part of step by step guide on how to simulate STM32 proje
 14. Double click on the the MCU part to open settings. Next to the Program File option, give full path to the Hex file generated using STM32Cube IDE. Then set the external crystal frequency to 8M (i.e. 8 MHz). Click OK to save the changes.
 https://engineeringxpert.com/wp-content/uploads/2022/04/26.png
 15. click on debug and simulate using simulation as shown below 
-```
+
+
 ## STM 32 CUBE PROGRAM :
+```
 #include "main.h"
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 int main(void)
 {
-   HAL_Init();
-   SystemClock_Config();
-   MX_GPIO_Init();
-  while (1){
+
+  HAL_Init();
+  SystemClock_Config();
+  MX_GPIO_Init();
+  while (1)
+  {
 
   }
-  }
 
+}
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
-	if(GPIO_Pin == GPIO_PIN_9)
+	if (GPIO_Pin == GPIO_PIN_9)
 	{
-		HAL_GPIO_TogglePin(GPIOA,GPIO_PIN_11);
+		HAL_GPIO_TogglePin (GPIOA,GPIO_PIN_11);
 	}
 }
 void SystemClock_Config(void)
@@ -80,31 +86,27 @@ void SystemClock_Config(void)
   RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
   __HAL_RCC_PWR_CLK_ENABLE();
   __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE2);
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
-  RCC_OscInitStruct.HSIState = RCC_HSI_ON;
-  RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
-  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
-  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI;
-  RCC_OscInitStruct.PLL.PLLM = 8;
-  RCC_OscInitStruct.PLL.PLLN = 84;
-  RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
-  RCC_OscInitStruct.PLL.PLLQ = 4;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
+  RCC_OscInitStruct.HSEState = RCC_HSE_ON;
+  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_NONE;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
     Error_Handler();
   }
+ 
   RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
                               |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
-  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
+  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_HSE;
   RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
-  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV2;
+  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
   RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
 
-  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_2) != HAL_OK)
+  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_0) != HAL_OK)
   {
     Error_Handler();
   }
 }
+
 static void MX_GPIO_Init(void)
 {
   GPIO_InitTypeDef GPIO_InitStruct = {0};
@@ -113,7 +115,7 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(GPIOA, GPIO_PIN_11, GPIO_PIN_RESET);
   GPIO_InitStruct.Pin = GPIO_PIN_9;
   GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
-  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
   GPIO_InitStruct.Pin = GPIO_PIN_11;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
@@ -122,12 +124,13 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
   HAL_NVIC_SetPriority(EXTI9_5_IRQn, 0, 0);
   HAL_NVIC_EnableIRQ(EXTI9_5_IRQn);
-}
 
+}
 void Error_Handler(void)
 {
-    __disable_irq();
-  while (1){
+  __disable_irq();
+  while (1)
+  {
 
   }
   }
@@ -135,21 +138,26 @@ void Error_Handler(void)
 #ifdef  USE_FULL_ASSERT
 void assert_failed(uint8_t *file, uint32_t line)
 {
+ ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) 
+  
 }
 #endif
 ```
 
 
-
 ## Output screen shots of proteus  :
-![Screenshot 2024-10-14 093323](https://github.com/user-attachments/assets/c50228e4-8e65-4a84-84de-81e61d23d4c4)
+# OFF:
+![Screenshot 2024-11-20 143345](https://github.com/user-attachments/assets/b5d1a7d2-8924-4d4c-be29-2bc6c35e8a8d)
+# ON:
+![Screenshot 2024-11-20 142944](https://github.com/user-attachments/assets/cf6899d4-b028-4a10-87fb-c818c1d1811a)
 
-![Screenshot 2024-10-14 093333](https://github.com/user-attachments/assets/638725fb-fbab-4529-b942-7d5c37e3b5ff)
 
  
+ 
  ## CIRCUIT DIAGRAM (EXPORT THE GRAPHICS TO PDF AND ADD THE SCREEN SHOT HERE): 
- ![image](https://github.com/user-attachments/assets/d8624db4-92ad-4806-927f-98178e91417a)
+![Screenshot 2024-11-20 142614](https://github.com/user-attachments/assets/473bb171-ce69-4f60-a418-c235d2e08516)
 
-
+ 
+ 
 ## Result :
 Interfacing a push button and interrupt genrateion is simulated using proteus 
